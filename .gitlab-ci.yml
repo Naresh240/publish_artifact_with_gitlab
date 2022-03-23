@@ -1,0 +1,29 @@
+variables:
+  pacakge_name: 'maven'
+  version: '1.0.0'
+stages:
+  - build
+  - deploy
+build:
+  stage: build
+  tags:
+   - shell  
+  only:    
+    - web  
+  image: openjdk:12-alpine
+  script:
+  - mvn clean install
+  artifacts:
+    paths:
+      - ./target/*.jar
+deploy:
+  stage: deploy
+  dependencies:
+  - build
+  tags:
+   - shell
+  only:    
+    - web
+  script:
+    |-
+    curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file ./target/gs-spring-boot-0.1.0.jar ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${pacakge_name}/${version}/gs-spring-boot-0.1.0.jar
